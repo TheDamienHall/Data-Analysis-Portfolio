@@ -3,7 +3,7 @@
 --- # Here is an exploratory analysis of Divvy Bikes, a bike share company based in Chicago, Illinois #
 
 
---- # Firstly I want an overview of the database #
+--- # Firstly I want an overview of the database # 
 
 select *
 from public."202201_divvy_tripdata" dt 
