@@ -1,1 +1,87 @@
+--- An analysis of Divvy Bikes Sql Database.
 
+--- Here is an exploratory analysis of Divvy Bikes, a bike share company based in Chicago, Illinois
+
+
+--- Firstly I want an overview of the database
+
+select *
+from public."202201_divvy_tripdata" dt 
+
+---Now I want to do a count of the individual trips 
+
+select count(*) as trips
+from public."202201_divvy_tripdata" dt 
+order by trips desc
+
+--- Here I found that there are 4,589,491 recorded trips or "Rides" in the database
+
+--- Next I want to know the timeframe in which the data was collected
+
+select MIN(started_at), max(started_at)
+from public."202201_divvy_tripdata" dt
+
+--- Here we see that the first start date is January 1st 2022 at 00:05 AM and the Last Start date is the 30th of September 2022 at 23:59  PM
+--- So we can see this data has been colleced over a 9 month period in 2022.
+
+--- Next I wanted to see the split of trips between member and casual riders 
+
+select member_casual , count(*) as trips
+from public."202201_divvy_tripdata" dt
+group by member_casual
+order by trips desc
+
+--- As we can see there are 2,622,114 member trips compared to 1,967,377 'casual' or non-member trips.
+
+--- Next I wanted to see the differance between the ridable types.
+
+select rideable_type, count(*) as trips
+from public."202201_divvy_tripdata" dt
+group by rideable_type
+order by trips desc
+
+--- Here we see that 2,262,739 of the trips were on electric bikes, 2,169,703 on classic bikes and only 157,049 on docked bikes.
+--- An almost even split between electric bikes and classic bikes could show that consumers may not care about the convieniences of a electric bike.
+
+--- Next I wanted to see what was the most popular month and conversly what the least popular month was.
+
+select date_part('month',started_at::date) as month, count(*) as trips
+from public."202201_divvy_tripdata" dt
+group by month
+order by trips desc
+
+--- Here we see July is the most popular month with 823,488 trips, and the least popular month was January with only 103,770 trips
+--- This is a clear indication that riders are more likely to ride in the summer months were the top 3 popular months are July, August and June
+--- Where the least 3 popular months are January, February and March
+
+--- I wanted to see if there was a most popular time of day, so I wrote this query to find out.
+
+select date_part('hour',started_at::time) as hour, count(*) as trips
+from public."202201_divvy_tripdata" dt
+group by hour
+order by trips desc
+
+--- Here we can see that 1700 or 5pm is the most popular time of day with 463,534 trips and that 0400 or 4am is the least popular time with only 13,334 trips
+--- I believe that this is due to people finishing work and riding home at 1700, to follow my nose...
+
+select date_part('hour',started_at::time) as hour, count(*) as riders
+from public."202201_divvy_tripdata" dt
+where member_casual ='member'
+group by hour
+order by riders desc
+
+--- I followed my hunch and added a 'WHERE' clause and found that among members 1700 is the most popular time with 275,705 members
+--- As a member is likley to be a native of Chicago and over half of the 1700 time being members I believe that my hunch is correct and that after work...
+--- ... commuters make up the reason that 1700 is such a popular hour.
+
+--- Next I wanted to determine the 10 most popular routes.
+
+select count(*) as trips, start_station_name ,end_station_name
+from public."202201_divvy_tripdata" dt
+where start_station_name <> '' and end_station_name <> ''
+group by start_station_name ,end_station_name
+order by trips desc, start_station_name, end_station_name
+limit 10
+
+--- After exculding the Null Values we can see that by far the most popular route is Streeter Dr and Grand Ave to Streeter Dr and Grand Ave, a round trip!
+--- In fact the 5 of the top 10 are round trips and the other 5 are routes between the top 10
